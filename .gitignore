@@ -37,3 +37,8 @@ out/
 .vscode/
 
 .sf/
+
+### Secrets ###
+src/main/resources/application.properties
+src/main/resources/application-*.properties
+!src/main/resources/application-example.properties

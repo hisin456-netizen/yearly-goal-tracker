@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,10 +24,13 @@ public class SubTaskController {
 
     @PostMapping("/goals/{goalId}/sub-tasks")
     public ResponseEntity<ApiResponse<SubTaskResponse>> createSubTask(
+            @AuthenticationPrincipal Long authUserId,
             @PathVariable Long goalId,
             @Valid @RequestBody SubTaskCreateRequest request
     ) {
-        SubTaskResponse response = subTaskService.createSubTask(goalId, request);
+        SubTaskResponse response = (authUserId != null)
+                ? subTaskService.createSubTask(authUserId, goalId, request)
+                : subTaskService.createSubTask(goalId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("하위 태스크가 생성되었습니다.", response));
     }
 
@@ -47,16 +51,26 @@ public class SubTaskController {
 
     @PutMapping("/sub-tasks/{id}")
     public ResponseEntity<ApiResponse<SubTaskResponse>> updateSubTask(
+            @AuthenticationPrincipal Long authUserId,
             @PathVariable Long id,
             @Valid @RequestBody SubTaskUpdateRequest request
     ) {
-        SubTaskResponse response = subTaskService.updateSubTask(id, request);
+        SubTaskResponse response = (authUserId != null)
+                ? subTaskService.updateSubTask(authUserId, id, request)
+                : subTaskService.updateSubTask(id, request);
         return ResponseEntity.ok(ApiResponse.success("하위 태스크가 수정되었습니다.", response));
     }
 
     @DeleteMapping("/sub-tasks/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteSubTask(@PathVariable Long id) {
-        subTaskService.deleteSubTask(id);
+    public ResponseEntity<ApiResponse<Void>> deleteSubTask(
+            @AuthenticationPrincipal Long authUserId,
+            @PathVariable Long id
+    ) {
+        if (authUserId != null) {
+            subTaskService.deleteSubTask(authUserId, id);
+        } else {
+            subTaskService.deleteSubTask(id);
+        }
         return ResponseEntity.ok(ApiResponse.success("하위 태스크가 삭제되었습니다.", null));
     }
 }

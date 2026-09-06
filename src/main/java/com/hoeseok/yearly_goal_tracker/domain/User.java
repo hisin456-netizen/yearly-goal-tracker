@@ -1,5 +1,6 @@
 package com.hoeseok.yearly_goal_tracker.domain;
 
+import com.hoeseok.yearly_goal_tracker.domain.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -25,7 +26,24 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, length = 50)
     private String username;
 
+    @Column(nullable = false, columnDefinition = "varchar(255) default ''")
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20, columnDefinition = "varchar(20) default 'ROLE_USER'")
+    @Builder.Default
+    private UserRole role = UserRole.ROLE_USER;
+
     public void updateUsername(String username) {
         this.username = username;
     }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateRole(UserRole role) {
+        this.role = role;
+    }
 }
+

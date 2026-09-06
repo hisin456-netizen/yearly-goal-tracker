@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -24,10 +25,13 @@ public class CheckInController {
 
     @PostMapping("/sub-tasks/{subTaskId}/check-ins")
     public ResponseEntity<ApiResponse<CheckInResponse>> createCheckIn(
+            @AuthenticationPrincipal Long authUserId,
             @PathVariable Long subTaskId,
             @Valid @RequestBody CheckInCreateRequest request
     ) {
-        CheckInResponse response = checkInService.createCheckIn(subTaskId, request);
+        CheckInResponse response = (authUserId != null)
+                ? checkInService.createCheckIn(authUserId, subTaskId, request)
+                : checkInService.createCheckIn(subTaskId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("체크인이 기록되었습니다.", response));
     }
 
@@ -54,16 +58,26 @@ public class CheckInController {
 
     @PutMapping("/check-ins/{id}")
     public ResponseEntity<ApiResponse<CheckInResponse>> updateCheckIn(
+            @AuthenticationPrincipal Long authUserId,
             @PathVariable Long id,
             @Valid @RequestBody CheckInUpdateRequest request
     ) {
-        CheckInResponse response = checkInService.updateCheckIn(id, request);
+        CheckInResponse response = (authUserId != null)
+                ? checkInService.updateCheckIn(authUserId, id, request)
+                : checkInService.updateCheckIn(id, request);
         return ResponseEntity.ok(ApiResponse.success("체크인 기록이 수정되었습니다.", response));
     }
 
     @DeleteMapping("/check-ins/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteCheckIn(@PathVariable Long id) {
-        checkInService.deleteCheckIn(id);
+    public ResponseEntity<ApiResponse<Void>> deleteCheckIn(
+            @AuthenticationPrincipal Long authUserId,
+            @PathVariable Long id
+    ) {
+        if (authUserId != null) {
+            checkInService.deleteCheckIn(authUserId, id);
+        } else {
+            checkInService.deleteCheckIn(id);
+        }
         return ResponseEntity.ok(ApiResponse.success("체크인 기록이 삭제되었습니다.", null));
     }
 }

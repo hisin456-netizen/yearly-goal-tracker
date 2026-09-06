@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,11 +29,16 @@ public class GoalService {
 
     @Transactional
     public GoalResponse createGoal(GoalCreateRequest request) {
+        return createGoal(request.getUserId(), request);
+    }
+
+    @Transactional
+    public GoalResponse createGoal(Long userId, GoalCreateRequest request) {
         if (request.getStartDate().isAfter(request.getEndDate())) {
             throw new CustomException(ErrorCode.INVALID_GOAL_PERIOD);
         }
 
-        User user = userService.findUserById(request.getUserId());
+        User user = userService.findUserById(userId);
 
         Goal goal = Goal.builder()
                 .user(user)
@@ -50,6 +56,10 @@ public class GoalService {
     }
 
     public List<GoalResponse> getGoals(Long userId, GoalCategory category, GoalStatus status) {
+        if (userId == null) {
+            return Collections.emptyList();
+        }
+
         List<Goal> goals;
         if (category != null) {
             goals = goalRepository.findByUserIdAndCategoryOrderByCreatedAtDesc(userId, category);
@@ -65,14 +75,25 @@ public class GoalService {
     }
 
     public GoalDetailResponse getGoalDetail(Long goalId) {
+        return getGoalDetail(null, goalId);
+    }
+
+    public GoalDetailResponse getGoalDetail(Long userId, Long goalId) {
         Goal goal = goalRepository.findByIdWithSubTasks(goalId)
                 .orElseThrow(() -> new CustomException(ErrorCode.GOAL_NOT_FOUND));
+        validateGoalOwner(goal, userId);
         return GoalDetailResponse.from(goal);
     }
 
     @Transactional
     public GoalResponse updateGoal(Long goalId, GoalUpdateRequest request) {
+        return updateGoal(null, goalId, request);
+    }
+
+    @Transactional
+    public GoalResponse updateGoal(Long userId, Long goalId, GoalUpdateRequest request) {
         Goal goal = findGoalById(goalId);
+        validateGoalOwner(goal, userId);
 
         if (request.getStartDate() != null && request.getEndDate() != null) {
             if (request.getStartDate().isAfter(request.getEndDate())) {
@@ -99,15 +120,33 @@ public class GoalService {
 
     @Transactional
     public GoalResponse updateGoalStatus(Long goalId, GoalStatus status) {
+        return updateGoalStatus(null, goalId, status);
+    }
+
+    @Transactional
+    public GoalResponse updateGoalStatus(Long userId, Long goalId, GoalStatus status) {
         Goal goal = findGoalById(goalId);
+        validateGoalOwner(goal, userId);
         goal.updateStatus(status);
         return GoalResponse.from(goal);
     }
 
     @Transactional
     public void deleteGoal(Long goalId) {
+        deleteGoal(null, goalId);
+    }
+
+    @Transactional
+    public void deleteGoal(Long userId, Long goalId) {
         Goal goal = findGoalById(goalId);
+        validateGoalOwner(goal, userId);
         goalRepository.delete(goal);
+    }
+
+    public void validateGoalOwner(Goal goal, Long userId) {
+        if (userId != null && goal.getUser() != null && !goal.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
     }
 
     public Goal findGoalById(Long goalId) {

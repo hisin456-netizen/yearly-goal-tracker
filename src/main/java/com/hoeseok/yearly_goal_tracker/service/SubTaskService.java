@@ -26,7 +26,13 @@ public class SubTaskService {
 
     @Transactional
     public SubTaskResponse createSubTask(Long goalId, SubTaskCreateRequest request) {
+        return createSubTask(null, goalId, request);
+    }
+
+    @Transactional
+    public SubTaskResponse createSubTask(Long userId, Long goalId, SubTaskCreateRequest request) {
         Goal goal = goalService.findGoalById(goalId);
+        goalService.validateGoalOwner(goal, userId);
 
         SubTask subTask = SubTask.builder()
                 .goal(goal)
@@ -60,7 +66,14 @@ public class SubTaskService {
 
     @Transactional
     public SubTaskResponse updateSubTask(Long subTaskId, SubTaskUpdateRequest request) {
+        return updateSubTask(null, subTaskId, request);
+    }
+
+    @Transactional
+    public SubTaskResponse updateSubTask(Long userId, Long subTaskId, SubTaskUpdateRequest request) {
         SubTask subTask = findSubTaskById(subTaskId);
+        validateSubTaskOwner(subTask, userId);
+
         subTask.update(
                 request.getTitle(),
                 request.getPeriodType(),
@@ -72,8 +85,22 @@ public class SubTaskService {
 
     @Transactional
     public void deleteSubTask(Long subTaskId) {
+        deleteSubTask(null, subTaskId);
+    }
+
+    @Transactional
+    public void deleteSubTask(Long userId, Long subTaskId) {
         SubTask subTask = findSubTaskById(subTaskId);
+        validateSubTaskOwner(subTask, userId);
         subTaskRepository.delete(subTask);
+    }
+
+    public void validateSubTaskOwner(SubTask subTask, Long userId) {
+        if (userId != null && subTask.getGoal() != null && subTask.getGoal().getUser() != null) {
+            if (!subTask.getGoal().getUser().getId().equals(userId)) {
+                throw new CustomException(ErrorCode.FORBIDDEN);
+            }
+        }
     }
 
     public SubTask findSubTaskById(Long subTaskId) {

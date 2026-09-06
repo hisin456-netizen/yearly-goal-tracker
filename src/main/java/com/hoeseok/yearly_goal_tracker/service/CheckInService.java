@@ -26,7 +26,13 @@ public class CheckInService {
 
     @Transactional
     public CheckInResponse createCheckIn(Long subTaskId, CheckInCreateRequest request) {
+        return createCheckIn(null, subTaskId, request);
+    }
+
+    @Transactional
+    public CheckInResponse createCheckIn(Long userId, Long subTaskId, CheckInCreateRequest request) {
         SubTask subTask = subTaskService.findSubTaskById(subTaskId);
+        subTaskService.validateSubTaskOwner(subTask, userId);
 
         if (checkInRepository.existsBySubTaskIdAndCheckInDate(subTaskId, request.getCheckInDate())) {
             throw new CustomException(ErrorCode.CHECK_IN_ALREADY_EXISTS);
@@ -63,7 +69,14 @@ public class CheckInService {
 
     @Transactional
     public CheckInResponse updateCheckIn(Long checkInId, CheckInUpdateRequest request) {
+        return updateCheckIn(null, checkInId, request);
+    }
+
+    @Transactional
+    public CheckInResponse updateCheckIn(Long userId, Long checkInId, CheckInUpdateRequest request) {
         CheckIn checkIn = findCheckInById(checkInId);
+        validateCheckInOwner(checkIn, userId);
+
         checkIn.update(
                 request.getStatus(),
                 request.getProgressRate(),
@@ -74,8 +87,20 @@ public class CheckInService {
 
     @Transactional
     public void deleteCheckIn(Long checkInId) {
+        deleteCheckIn(null, checkInId);
+    }
+
+    @Transactional
+    public void deleteCheckIn(Long userId, Long checkInId) {
         CheckIn checkIn = findCheckInById(checkInId);
+        validateCheckInOwner(checkIn, userId);
         checkInRepository.delete(checkIn);
+    }
+
+    public void validateCheckInOwner(CheckIn checkIn, Long userId) {
+        if (userId != null && checkIn.getSubTask() != null) {
+            subTaskService.validateSubTaskOwner(checkIn.getSubTask(), userId);
+        }
     }
 
     public CheckIn findCheckInById(Long checkInId) {

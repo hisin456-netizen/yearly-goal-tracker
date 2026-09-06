@@ -15,7 +15,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class GoalCreateRequest {
 
-    @NotNull(message = "사용자 ID는 필수입니다.")
     private Long userId;
 
     @NotBlank(message = "목표 제목은 필수 입력값입니다.")

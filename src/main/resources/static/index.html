@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yearly Goal Tracker — 연간 목표 대시보드</title>
+  <meta name="description" content="연간 목표를 세우고 매일 체크인하며 성장을 기록하는 개인 목표 관리 대시보드">
+  <meta name="theme-color" content="#09090f">
+
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- Header -->
+    <header class="app-header" id="main-header">
+      <div class="brand-section">
+        <div class="brand-logo" id="brand-logo-icon">🎯</div>
+        <div class="brand-title-group">
+          <h1>Yearly Goal Tracker</h1>
+          <p id="header-subtitle">연간 목표 & 습관 관리 대시보드</p>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div class="pill-selector" id="year-selector-pill">
+          <span>📅</span>
+          <select id="year-select" aria-label="연도 선택"></select>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div id="auth-header-container" style="display: flex; align-items: center; gap: 8px;"></div>
+        <button type="button" class="btn btn-primary" id="add-goal-btn">
+          <span>+</span> 새 목표
+        </button>
+      </div>
+    </header>
+
+    <!-- Section Nav -->
+    <nav class="section-nav" id="section-nav">
+      <button class="section-nav-tab active" data-target="kpi-section">📊 대시보드</button>
+      <button class="section-nav-tab" data-target="timeline-container">🎯 목표</button>
+      <button class="section-nav-tab" data-target="heatmap-container">🌱 잔디</button>
+      <button class="section-nav-tab" data-target="linechart-container">📈 통계</button>
+      <button class="section-nav-tab" data-target="notes-container">🗒️ 노트</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="main-dashboard">
+
+      <!-- KPI Cards -->
+      <section class="kpi-grid" id="kpi-section" aria-label="목표 통계">
+
+        <article class="glass-card kpi-card emerald" id="kpi-annual-progress">
+          <div class="kpi-info">
+            <h4>전체 연간 진행률</h4>
+            <div class="kpi-value-row">
+              <span class="kpi-value" id="kpi-progress-val">0%</span>
+              <span class="kpi-subtext positive" id="kpi-progress-label">달성 진행중</span>
+            </div>
+          </div>
+          <div class="progress-ring-container">
+            <svg class="progress-ring" width="56" height="56" viewBox="0 0 56 56" aria-hidden="true">
+              <circle class="progress-ring-circle-bg" stroke-width="5" fill="transparent" r="24" cx="28" cy="28"/>
+              <circle class="progress-ring-circle" id="kpi-progress-circle" stroke-width="5" fill="transparent" r="24" cx="28" cy="28"/>
+            </svg>
+            <span class="progress-ring-text" id="kpi-progress-text">0%</span>
+          </div>
+        </article>
+
+        <article class="glass-card kpi-card indigo" id="kpi-active-goals">
+          <div class="kpi-info">
+            <h4>진행 중인 목표</h4>
+            <div class="kpi-value-row">
+              <span class="kpi-value" id="kpi-active-goals-val">0</span>
+              <span class="kpi-subtext">개 활성</span>
+            </div>
+          </div>
+          <div class="kpi-icon-pill">🎯</div>
+        </article>
+
+        <article class="glass-card kpi-card cyan" id="kpi-weekly-rate">
+          <div class="kpi-info">
+            <h4>이번 주 체크인율</h4>
+            <div class="kpi-value-row">
+              <span class="kpi-value" id="kpi-weekly-rate-val">0%</span>
+              <span class="kpi-subtext positive" id="kpi-weekly-label">실천율</span>
+            </div>
+          </div>
+          <div class="kpi-icon-pill">📈</div>
+        </article>
+
+        <article class="glass-card kpi-card coral" id="kpi-streak-card">
+          <div class="kpi-info">
+            <h4>연속 실천 스트릭</h4>
+            <div class="kpi-value-row">
+              <span class="kpi-value" id="kpi-streak-val">0</span>
+              <span class="kpi-subtext highlight" id="kpi-streak-label">일 연속</span>
+            </div>
+          </div>
+          <div class="kpi-icon-pill">🔥</div>
+        </article>
+
+      </section>
+
+      <!-- Dashboard Grid: Timeline + Check-In -->
+      <div class="dashboard-main-grid">
+        <section class="glass-card timeline-section" id="timeline-container" aria-label="연간 목표 타임라인">
+          <div style="text-align: center; padding: 48px 20px; color: var(--text-muted);">
+            <div style="font-size: 1.8rem; margin-bottom: 8px;">⏳</div>
+            <p style="font-size: 0.88rem;">불러오는 중...</p>
+          </div>
+        </section>
+
+        <aside class="glass-card today-section" id="today-checkin-container" aria-label="오늘의 체크인">
+          <div style="text-align: center; padding: 48px 16px; color: var(--text-muted);">
+            <div style="font-size: 1.8rem; margin-bottom: 8px;">⏳</div>
+            <p style="font-size: 0.88rem;">불러오는 중...</p>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Heatmap -->
+      <section class="glass-card heatmap-section" id="heatmap-container" aria-label="일일 실천 잔디">
+        <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.86rem;">
+          불러오는 중...
+        </div>
+      </section>
+
+      <!-- 날짜별 체크인 추이 차트 -->
+      <section class="glass-card linechart-section" id="linechart-container" aria-label="체크인 추이">
+        <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.86rem;">
+          불러오는 중...
+        </div>
+      </section>
+
+      <!-- 노트 섹션 -->
+      <section class="glass-card notes-section" id="notes-container" aria-label="노트">
+        <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.86rem;">
+          불러오는 중...
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Modals & Toasts -->
+    <div id="modal-container"></div>
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- FAB -->
+    <div class="fab-container" id="fab-container">
+      <div class="fab-menu" id="fab-menu">
+        <div class="fab-item">
+          <span class="fab-label">새 노트</span>
+          <button class="fab-action-btn" id="fab-new-note" aria-label="새 노트">📝</button>
+        </div>
+        <div class="fab-item">
+          <span class="fab-label">새 목표</span>
+          <button class="fab-action-btn" id="fab-new-goal" aria-label="새 목표">🎯</button>
+        </div>
+      </div>
+      <button class="fab-main" id="fab-main" aria-label="빠른 실행">
+        <span id="fab-main-icon">+</span>
+      </button>
+    </div>
+
+  </div>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

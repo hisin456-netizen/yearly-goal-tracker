@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -35,6 +38,12 @@ public class UserService {
     public UserResponse getUserById(Long userId) {
         User user = findUserById(userId);
         return UserResponse.from(user);
+    }
+
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserResponse::from)
+                .collect(Collectors.toList());
     }
 
     public User findUserById(Long userId) {
