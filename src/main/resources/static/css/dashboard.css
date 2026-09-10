@@ -460,6 +460,8 @@
 .goal-quick-btn.btn-ai:hover { background: rgba(124,111,250,0.15); }
 .goal-quick-btn.btn-detail { border-color: rgba(32,201,151,0.35); color: #6ee7b7; margin-left: auto; }
 .goal-quick-btn.btn-detail:hover { background: rgba(32,201,151,0.1); }
+.goal-quick-btn.btn-kanban { border-color: rgba(245,158,11,0.35); color: #fcd34d; }
+.goal-quick-btn.btn-kanban:hover { background: rgba(245,158,11,0.12); }
 
 .goal-row-info {
   display: flex;

@@ -36,6 +36,15 @@ public enum ErrorCode {
     // Note
     NOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "노트를 찾을 수 없습니다."),
 
+    // TaskLog
+    TASK_LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "작업 기록을 찾을 수 없습니다."),
+
+    // Schedule
+    SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "일정을 찾을 수 없습니다."),
+
+    // File
+    FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다."),
+
     // AI
     AI_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AI 서비스 호출에 실패했습니다.");
 

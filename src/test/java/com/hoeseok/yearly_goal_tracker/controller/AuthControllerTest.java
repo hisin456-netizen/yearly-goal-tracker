@@ -120,7 +120,7 @@ class AuthControllerTest {
                 .user(userResponse)
                 .build();
 
-        given(authService.login(any(LoginRequest.class))).willReturn(response);
+        given(authService.login(any(LoginRequest.class), any(), any())).willReturn(response);
 
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -139,7 +139,7 @@ class AuthControllerTest {
                 .password("wrongpassword")
                 .build();
 
-        given(authService.login(any(LoginRequest.class)))
+        given(authService.login(any(LoginRequest.class), any(), any()))
                 .willThrow(new CustomException(ErrorCode.INVALID_CREDENTIALS));
 
         mockMvc.perform(post("/api/v1/auth/login")

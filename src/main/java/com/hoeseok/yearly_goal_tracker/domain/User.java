@@ -34,6 +34,24 @@ public class User extends BaseTimeEntity {
     @Builder.Default
     private UserRole role = UserRole.ROLE_USER;
 
+    @Column(length = 255)
+    private String discordWebhookUrl;
+
+    @Column(columnDefinition = "integer default 30")
+    @Builder.Default
+    private Integer defaultReminderMinutes = 30;
+
+    @Column(length = 20)
+    private String provider;
+
+    @Column(length = 100)
+    private String providerId;
+
+    public void linkProvider(String provider, String providerId) {
+        this.provider = provider;
+        this.providerId = providerId;
+    }
+
     public void updateUsername(String username) {
         this.username = username;
     }
@@ -44,6 +62,11 @@ public class User extends BaseTimeEntity {
 
     public void updateRole(UserRole role) {
         this.role = role;
+    }
+
+    public void updateNotificationSettings(String discordWebhookUrl, Integer defaultReminderMinutes) {
+        if (discordWebhookUrl != null) this.discordWebhookUrl = discordWebhookUrl;
+        if (defaultReminderMinutes != null) this.defaultReminderMinutes = defaultReminderMinutes;
     }
 }
 

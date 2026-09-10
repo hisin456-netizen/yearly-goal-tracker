@@ -438,6 +438,36 @@ select.form-control option {
   cursor: not-allowed;
 }
 
+/* Google Login Button */
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: #1f1f1f;
+  font-family: var(--font);
+  font-size: 0.98rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-google:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.22);
+}
+
+.btn-google:active {
+  transform: translateY(0);
+}
+
 /* Switch Text */
 .switch-text {
   text-align: center;

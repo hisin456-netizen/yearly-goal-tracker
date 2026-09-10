@@ -60,6 +60,16 @@ export const api = {
   getUsers: () => request('/users'),
   createUser: (data) => request('/users', { method: 'POST', body: JSON.stringify(data) }),
   getUser: (id) => request(`/users/${id}`),
+  updateNotificationSettings: (data) => request('/users/me/notification-settings', { method: 'PATCH', body: JSON.stringify(data) }),
+  getLoginHistory: () => request('/users/me/login-history'),
+
+  // Schedules (Calendar)
+  schedules: {
+    getByMonth: (year, month) => request(`/schedules?year=${year}&month=${month}`),
+    create: (data) => request('/schedules', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => request(`/schedules/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    delete: (id) => request(`/schedules/${id}`, { method: 'DELETE' }),
+  },
 
   // Goals
   getGoals: (userId = null, category = null, status = null) => {
@@ -79,6 +89,7 @@ export const api = {
   // SubTasks
   getSubTasks: (goalId) => request(`/goals/${goalId}/sub-tasks`),
   createSubTask: (goalId, data) => request(`/goals/${goalId}/sub-tasks`, { method: 'POST', body: JSON.stringify(data) }),
+  updateSubTask: (id, data) => request(`/sub-tasks/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteSubTask: (id) => request(`/sub-tasks/${id}`, { method: 'DELETE' }),
 
   // CheckIns
@@ -105,6 +116,28 @@ export const api = {
     create: (data) => request('/notes', { method: 'POST', body: JSON.stringify(data) }),
     update: (id, data) => request(`/notes/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id) => request(`/notes/${id}`, { method: 'DELETE' }),
+  },
+
+  // TaskLogs
+  taskLogs: {
+    getAll: (subTaskId) => request(`/sub-tasks/${subTaskId}/logs`),
+    create: (subTaskId, data) => request(`/sub-tasks/${subTaskId}/logs`, { method: 'POST', body: JSON.stringify(data) }),
+    delete: (logId) => request(`/task-logs/${logId}`, { method: 'DELETE' }),
+  },
+
+  // File Upload
+  upload: async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const token = tokenStorage.getToken();
+    const response = await fetch(`${API_BASE}/upload`, {
+      method: 'POST',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) throw new Error(result.message || '업로드 실패');
+    return result.data;
   },
 
   // AI

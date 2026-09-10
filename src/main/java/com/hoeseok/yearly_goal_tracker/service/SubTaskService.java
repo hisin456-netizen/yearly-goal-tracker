@@ -39,7 +39,7 @@ public class SubTaskService {
                 .title(request.getTitle())
                 .periodType(request.getPeriodType())
                 .targetCount(request.getTargetCount())
-                .status(TaskStatus.IN_PROGRESS)
+                .status(TaskStatus.TODO)
                 .build();
 
         SubTask saved = subTaskRepository.save(subTask);

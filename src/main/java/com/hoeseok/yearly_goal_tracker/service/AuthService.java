@@ -22,6 +22,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final LoginHistoryService loginHistoryService;
 
     /**
      * 회원가입
@@ -46,13 +47,15 @@ public class AuthService {
     /**
      * 로그인 → JWT 토큰 발급
      */
-    public LoginResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_CREDENTIALS));
+    public LoginResponse login(LoginRequest request, String ipAddress, String userAgent) {
+        User user = userRepository.findByEmail(request.getEmail()).orElse(null);
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            loginHistoryService.record(request.getEmail(), user, false, ipAddress, userAgent, "INVALID_CREDENTIALS");
             throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
         }
+
+        loginHistoryService.record(request.getEmail(), user, true, ipAddress, userAgent, null);
 
         String token = jwtTokenProvider.generateToken(
                 user.getId(),

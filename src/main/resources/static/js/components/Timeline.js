@@ -96,6 +96,7 @@ export function renderTimeline(container, handlers) {
           <div class="goal-row-actions">
             <button class="goal-quick-btn btn-ai" data-action="ai" data-goal-id="${goal.id}">✨ AI 추천</button>
             <button class="goal-quick-btn btn-edit" data-action="edit" data-goal-id="${goal.id}">✏️ 수정</button>
+            <button class="goal-quick-btn btn-kanban" data-action="kanban" data-goal-id="${goal.id}">🗂️ 칸반보드</button>
             <button class="goal-quick-btn btn-detail" data-action="detail" data-goal-id="${goal.id}">상세보기 →</button>
           </div>
         </div>
@@ -179,6 +180,9 @@ export function renderTimeline(container, handlers) {
       if (action === 'detail') onSelect?.(goal);
       if (action === 'edit')   onEdit?.(goal);
       if (action === 'ai')     onAiSuggest?.(goal);
+      if (action === 'kanban') {
+        window.location.href = `/kanban.html?goalId=${goal.id}&goalTitle=${encodeURIComponent(goal.title)}`;
+      }
       return;
     }
 

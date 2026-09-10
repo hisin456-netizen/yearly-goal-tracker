@@ -38,6 +38,9 @@ class AuthServiceTest {
     @Mock
     private JwtTokenProvider jwtTokenProvider;
 
+    @Mock
+    private LoginHistoryService loginHistoryService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -113,7 +116,7 @@ class AuthServiceTest {
         given(jwtTokenProvider.generateToken(1L, "test@example.com", "ROLE_USER")).willReturn("jwt.mock.token");
 
         // when
-        LoginResponse response = authService.login(request);
+        LoginResponse response = authService.login(request, "127.0.0.1", "JUnit-Agent");
 
         // then
         assertThat(response.getToken()).isEqualTo("jwt.mock.token");
@@ -141,7 +144,7 @@ class AuthServiceTest {
         given(passwordEncoder.matches("wrongpassword", "encodedPassword")).willReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> authService.login(request))
+        assertThatThrownBy(() -> authService.login(request, "127.0.0.1", "JUnit-Agent"))
                 .isInstanceOf(CustomException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_CREDENTIALS);
     }
