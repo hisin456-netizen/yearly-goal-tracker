@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -44,6 +45,9 @@ class AuthServiceTest {
 
     @Mock
     private SignupPolicy signupPolicy;
+
+    @Mock
+    private LoginAttemptService loginAttemptService;
 
     @InjectMocks
     private AuthService authService;
@@ -147,6 +151,41 @@ class AuthServiceTest {
         // then
         assertThat(response.getToken()).isEqualTo("jwt.mock.token");
         assertThat(response.getUser().getEmail()).isEqualTo("test@example.com");
+        verify(loginAttemptService).recordSuccess("test@example.com");
+    }
+
+    @Test
+    @DisplayName("로그인 차단 - 실패가 너무 많으면 TOO_MANY_LOGIN_ATTEMPTS, 비밀번호 검사도 하지 않는다")
+    void login_blockedWhenTooManyFailures() {
+        // given: 비밀번호가 맞더라도 차단 중이면 거부되어야 한다
+        LoginRequest request = LoginRequest.builder()
+                .email("test@example.com")
+                .password("password123!")
+                .build();
+        given(loginAttemptService.isBlocked("127.0.0.1", "test@example.com")).willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> authService.login(request, "127.0.0.1", "JUnit-Agent"))
+                .isInstanceOf(CustomException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TOO_MANY_LOGIN_ATTEMPTS);
+        verifyNoInteractions(userRepository, passwordEncoder, jwtTokenProvider);
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - 존재하지 않는 이메일도 실패로 기록한다 (가입 여부를 알아내지 못하게)")
+    void login_fail_unknownEmail_recordsFailure() {
+        // given
+        LoginRequest request = LoginRequest.builder()
+                .email("nobody@example.com")
+                .password("whatever")
+                .build();
+        given(userRepository.findByEmail("nobody@example.com")).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> authService.login(request, "127.0.0.1", "JUnit-Agent"))
+                .isInstanceOf(CustomException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_CREDENTIALS);
+        verify(loginAttemptService).recordFailure("127.0.0.1", "nobody@example.com");
     }
 
     @Test
@@ -173,5 +212,6 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(request, "127.0.0.1", "JUnit-Agent"))
                 .isInstanceOf(CustomException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_CREDENTIALS);
+        verify(loginAttemptService).recordFailure("127.0.0.1", "test@example.com");
     }
 }

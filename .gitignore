@@ -54,3 +54,6 @@ e2e/node_modules/
 e2e/test-results/
 e2e/playwright-report/
 e2e/.cache/
+
+### DB/업로드 백업 (개인 데이터라 git에 올리지 않음) ###
+backups/

@@ -102,7 +102,53 @@ docker compose logs -f app      # "Started YearlyGoalTrackerApplication" 확인
 > `duckdns.org` 같은 공용 서브도메인을 Google이 리디렉션 URI로 허용하는지는 확인하지 못했다.
 > 안 되면 이메일 로그인을 쓰거나, 본인 소유 도메인을 연결한다.
 
-## 6. 운영
+## 6. 백업 (꼭 설정한다)
+
+> **왜 중요한가:** Oracle은 7일 동안 CPU/네트워크(A1은 메모리도)가 20% 미만인 "유휴" 무료 인스턴스를 회수할 수 있다고 안내한다.
+> 둘이서 쓰는 이 앱은 거의 항상 이 조건에 해당한다. 서버가 회수돼도 **서버 밖에 백업이 있으면** 새 서버에서 그대로 복원할 수 있다.
+
+### 6-1. 서버에서 매일 자동 백업 (cron)
+
+```bash
+cd ~/yearly-goal-tracker
+./scripts/backup.sh          # 먼저 손으로 한 번 실행해서 "backup OK" 가 나오는지 확인
+ls -lh backups/              # db_*.sql.gz, uploads_*.tar.gz, *_latest.* 파일이 생긴다
+
+crontab -e                   # 아래 한 줄 추가 (매일 새벽 4시 30분)
+30 4 * * * cd $HOME/yearly-goal-tracker && ./scripts/backup.sh >> $HOME/ygt-backup.log 2>&1
+```
+
+- 서버 안에는 최근 14일치를 보관한다 (`KEEP_DAYS` 로 변경). 백업 중 오류가 나면 깨진 파일을 남기지 않고 오류를 로그에 남긴다.
+- 서버 안의 백업만으로는 서버가 사라질 때 같이 사라진다. **다음 6-2를 꼭 한다.**
+
+### 6-2. 내 PC로 가져오기 (서버 밖 보관)
+
+내 PC의 PowerShell에서 (Windows 10/11 은 `scp` 가 기본 설치돼 있다):
+
+```powershell
+mkdir C:\ygt-backups -Force
+scp -i C:\경로\ssh-key.key "ubuntu@<공용IP>:~/yearly-goal-tracker/backups/*_latest.*" C:\ygt-backups\
+```
+
+일주일에 한 번쯤, 또는 데이터를 많이 넣은 날 실행한다. 같은 이름으로 덮어쓰이므로, 날짜별로 남기려면 받은 폴더를 복사해 둔다.
+(Windows 작업 스케줄러에 등록하면 자동화할 수 있다.)
+
+### 6-3. 복원하기
+
+같은 서버에서 되돌리거나, **새 서버로 옮길 때** 사용한다. 새 서버에서는 4단계(배포)까지 마친 뒤 실행한다.
+
+```bash
+# 내 PC → 새 서버로 백업 올리기 (PowerShell)
+scp -i C:\경로\ssh-key.key C:\ygt-backups\*_latest.* ubuntu@<새 공용IP>:~/yearly-goal-tracker/backups/
+
+# 서버에서 복원 (현재 데이터가 백업으로 덮어써지므로 yes 확인을 묻는다)
+cd ~/yearly-goal-tracker
+./scripts/restore.sh backups/db_latest.sql.gz backups/uploads_latest.tar.gz
+```
+
+> **복원이 실제로 되는지 미리 한 번 연습해 두는 것을 권한다.** 백업은 복원해 봐야 믿을 수 있다.
+
+## 7. 운영
 
 ```bash
 # 업데이트
@@ -111,16 +157,23 @@ git pull && docker compose --profile https up -d --build
 # 로그
 docker compose logs -f app
 
-# DB 백업 (주기적으로 실행해서 VM 밖에 보관 권장)
-docker compose exec -T db pg_dump -U postgres yearly_goal_db > backup_$(date +%F).sql
-
-# 복원
-cat backup_2026-09-21.sql | docker compose exec -T db psql -U postgres yearly_goal_db
+# 상태
+docker compose ps
 ```
+
+## 보안 설정 요약
+
+- **로그인 시도 제한:** 같은 이메일로 5회(같은 IP는 20회) 실패하면 15분 동안 로그인이 차단된다(HTTP 429). 시간이 지나면 자동으로 풀린다.
+  차단 중에는 비밀번호가 맞아도 거부된다. 그래도 **강한 비밀번호는 필수**다.
+- **Swagger(API 문서)는 운영에서 비공개**다(404).
+- **SSH 는 키 로그인만** 쓴다. 비밀번호 로그인은 켜지 않는다. 키 파일(`.key`)은 잃어버리지 않게 여러 곳에 백업한다.
+- 서버의 `.env` 는 `chmod 600 .env` 로 다른 사용자가 못 읽게 한다.
 
 ## 주의
 
-- **Oracle은 유휴 Always Free 인스턴스를 회수할 수 있다**고 안내한다(장기간 CPU/메모리/네트워크 사용률이 매우 낮을 때). 백업을 VM 밖에도 남겨 둔다.
+- **Oracle은 유휴 Always Free 인스턴스를 회수할 수 있다**(위 6번 참고). 서버 밖 백업(6-2)을 꼭 한다.
+- **요금 실수 방지:** 인스턴스는 "Always Free 사용 가능" 표시가 있는 셰이프만 고르고, **"Pay As You Go 업그레이드"는 누르지 않는다.**
+  가입 직후 청구 → 예산에서 **$1 예산 알림**을 만들어 둔다.
 - **가입은 `ALLOWED_EMAILS` 에 적은 이메일만 가능하다.** 필수값이라 비우면 `docker compose` 가 실행되지 않는다.
   이메일 가입과 Google 로그인(새 계정 생성) 모두에 적용되고, 이미 가입된 계정의 로그인에는 영향이 없다.
   이메일을 바꾸려면 `.env` 수정 후 `docker compose --profile https up -d`.

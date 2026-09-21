@@ -25,8 +25,12 @@ docker compose --profile https up -d --build     # 서버: Caddy가 80/443 + 자
 git pull && docker compose up -d --build
 ```
 
-DB 백업:
+백업 / 복원 (DB + 업로드 이미지, 자세한 내용은 배포 가이드 6번):
 
 ```bash
-docker compose exec db pg_dump -U postgres yearly_goal_db > backup.sql
+./scripts/backup.sh                                                        # backups/ 에 저장 (cron 으로 매일 실행 권장)
+./scripts/restore.sh backups/db_latest.sql.gz backups/uploads_latest.tar.gz   # 복원 (현재 데이터를 덮어씀)
 ```
+
+보안 관련 동작:
+- 로그인 5회 연속 실패(같은 IP는 20회) 시 15분간 차단(429), 운영 프로필에서는 Swagger 비공개, 가입은 `ALLOWED_EMAILS` 만 허용.

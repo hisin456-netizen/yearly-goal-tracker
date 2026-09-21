@@ -10,10 +10,12 @@ import com.hoeseok.yearly_goal_tracker.dto.user.UserResponse;
 import com.hoeseok.yearly_goal_tracker.repository.UserRepository;
 import com.hoeseok.yearly_goal_tracker.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -24,6 +26,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final LoginHistoryService loginHistoryService;
     private final SignupPolicy signupPolicy;
+    private final LoginAttemptService loginAttemptService;
 
     /**
      * 회원가입
@@ -54,13 +57,21 @@ public class AuthService {
      * 로그인 → JWT 토큰 발급
      */
     public LoginResponse login(LoginRequest request, String ipAddress, String userAgent) {
+        // 차단 중에는 비밀번호가 맞아도 거부한다 (차단 중에 계속 추측해서 성공 여부를 알아내지 못하게)
+        if (loginAttemptService.isBlocked(ipAddress, request.getEmail())) {
+            log.warn("Login blocked (too many failures): ip={}", ipAddress);
+            throw new CustomException(ErrorCode.TOO_MANY_LOGIN_ATTEMPTS);
+        }
+
         User user = userRepository.findByEmail(request.getEmail()).orElse(null);
 
         if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            loginAttemptService.recordFailure(ipAddress, request.getEmail());
             loginHistoryService.record(request.getEmail(), user, false, ipAddress, userAgent, "INVALID_CREDENTIALS");
             throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
         }
 
+        loginAttemptService.recordSuccess(request.getEmail());
         loginHistoryService.record(request.getEmail(), user, true, ipAddress, userAgent, null);
 
         String token = jwtTokenProvider.generateToken(
