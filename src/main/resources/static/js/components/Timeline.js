@@ -181,7 +181,8 @@ export function renderTimeline(container, handlers) {
       if (action === 'edit')   onEdit?.(goal);
       if (action === 'ai')     onAiSuggest?.(goal);
       if (action === 'kanban') {
-        window.location.href = `/kanban.html?goalId=${goal.id}&goalTitle=${encodeURIComponent(goal.title)}`;
+        state.setSelectedGoal(goal.id, goal.title);
+        document.getElementById('kanban-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
       return;
     }

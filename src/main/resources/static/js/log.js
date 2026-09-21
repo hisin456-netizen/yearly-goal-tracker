@@ -1,4 +1,5 @@
 import { api, tokenStorage } from './api.js';
+import { initThemeToggle } from './theme.js';
 
 function showToast(message, type = 'success') {
   const container = document.getElementById('toast-container');
@@ -30,6 +31,7 @@ async function init() {
   document.getElementById('st-title-label').textContent   = stTitle;
   document.title = `${stTitle} — 작업 기록`;
   document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
+  initThemeToggle(document.getElementById('theme-toggle-btn'));
 
   await loadLogs();
   bindEvents();

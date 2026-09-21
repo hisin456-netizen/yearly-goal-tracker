@@ -6,6 +6,9 @@ import { setupModals } from './components/Modals.js';
 import { renderHeatmap } from './components/Heatmap.js';
 import { renderLineChart } from './components/LineChart.js';
 import { renderNotes } from './components/Notes.js';
+import { renderKanbanSection } from './components/KanbanSection.js';
+import { renderCalendarSection } from './components/CalendarSection.js';
+import { initThemeToggle } from './theme.js';
 
 // ── Toast ─────────────────────────────────────────────
 export function showToast(message, type = 'success') {
@@ -84,6 +87,9 @@ async function reloadData() {
 
     const notesEl = document.getElementById('notes-container');
     if (notesEl) await renderNotes(notesEl, state.goals, showToast);
+
+    const calendarEl = document.getElementById('calendar-container');
+    if (calendarEl) await renderCalendarSection(calendarEl, state.currentUser, showToast);
   } catch (err) {
     showToast(`데이터 로드 실패: ${err.message}`, 'error');
   }
@@ -104,7 +110,7 @@ function initSectionNav() {
   });
 
   // Scroll-spy: highlight tab for visible section
-  const sectionIds = ['kpi-section', 'timeline-container', 'heatmap-container', 'linechart-container', 'notes-container'];
+  const sectionIds = ['kpi-section', 'timeline-container', 'kanban-container', 'calendar-container', 'heatmap-container', 'linechart-container', 'notes-container'];
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -245,10 +251,12 @@ function renderGuestView() {
 // ── Init ──────────────────────────────────────────────
 async function initApp() {
   initYearSelector();
+  initThemeToggle(document.getElementById('theme-toggle-btn'));
 
   const modalContainer  = document.getElementById('modal-container');
   const timelineEl      = document.getElementById('timeline-container');
   const todayEl         = document.getElementById('today-checkin-container');
+  const kanbanEl        = document.getElementById('kanban-container');
 
   const modalHandlers = setupModals(modalContainer, reloadData, showToast);
 
@@ -263,6 +271,7 @@ async function initApp() {
   initSectionNav();
   initFab(modalHandlers);
 
+  let lastRenderedGoalId; // guards against re-rendering the kanban board on unrelated state changes
   state.subscribe(() => {
     renderTimeline(timelineEl, {
       onSelect:    goal => modalHandlers.openGoalDetailModal(goal),
@@ -270,6 +279,11 @@ async function initApp() {
       onAiSuggest: goal => modalHandlers.openGoalDetailModal(goal, { autoAi: true }),
     });
     renderTodayCheckIn(todayEl, reloadData, showToast);
+
+    if (kanbanEl && state.selectedGoalId !== lastRenderedGoalId) {
+      lastRenderedGoalId = state.selectedGoalId;
+      renderKanbanSection(kanbanEl, state.selectedGoalId, state.selectedGoalTitle, showToast);
+    }
   });
 
   window.addEventListener('auth:unauthorized', () => {

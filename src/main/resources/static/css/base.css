@@ -2,12 +2,13 @@
 
 :root {
   /* ── Colors ─────────────────────────────── */
+  --overlay-rgb:     255, 255, 255;
   --bg-dark:         #09090f;
   --bg-surface:      #111119;
   --bg-card:         rgba(18, 18, 26, 0.8);
   --bg-card-hover:   rgba(26, 26, 38, 0.9);
   --bg-elevated:     #1a1a26;
-  --border-subtle:   rgba(255, 255, 255, 0.07);
+  --border-subtle:   rgba(var(--overlay-rgb), 0.07);
   --border-glow:     rgba(124, 111, 250, 0.4);
 
   --text-primary:    #f0f0f5;
@@ -25,6 +26,19 @@
   --color-coral:        #f25c78;
   --color-amber:        #f59e0b;
   --color-purple:       #a78bfa;
+
+  /* ── Badge/status text (dark-bg pastel tones) ── */
+  --badge-study-tx:    #34d399;
+  --badge-reading-tx:  #c4b5fd;
+  --badge-health-tx:   #fca5a5;
+  --badge-career-tx:   #7dd3fc;
+  --badge-finance-tx:  #fcd34d;
+  --badge-hobby-tx:    #f9a8d4;
+  --badge-other-tx:    #94a3b8;
+  --badge-progress-tx: #a5b4fc;
+  --badge-completed-tx: #6ee7b7;
+  --badge-delayed-tx:  #fca5a5;
+  --badge-suspended-tx: #94a3b8;
 
   /* ── Typography ─────────────────────────── */
   --font-main: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -49,6 +63,45 @@
   --trans-normal: 0.24s cubic-bezier(0.4, 0, 0.2, 1);
   --trans-spring: 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+
+/* ── Light theme ──────────────────────────────── */
+:root[data-theme="light"] {
+  --overlay-rgb:     30, 24, 62;
+  --bg-dark:         #FAFAFE;
+  --bg-surface:      #FFFFFF;
+  --bg-card:         #FFFFFF;
+  --bg-card-hover:   #F6F4FE;
+  --bg-elevated:     #F0EDFB;
+  --border-subtle:   rgba(124, 111, 250, 0.16);
+  --border-glow:     rgba(124, 111, 250, 0.35);
+
+  --text-primary:    #221B3F;
+  --text-secondary:  #746E93;
+  --text-muted:      #A6A1C2;
+
+  --color-emerald-glow: rgba(16, 185, 129, 0.18);
+  --brand-title-gradient: linear-gradient(135deg, #221B3F 0%, #5B3FE0 100%);
+
+  --badge-study-tx:    #047857;
+  --badge-reading-tx:  #6d28d9;
+  --badge-health-tx:   #b91c1c;
+  --badge-career-tx:   #0369a1;
+  --badge-finance-tx:  #b45309;
+  --badge-hobby-tx:    #be185d;
+  --badge-other-tx:    #475569;
+  --badge-progress-tx: #4338ca;
+  --badge-completed-tx: #047857;
+  --badge-delayed-tx:  #b91c1c;
+  --badge-suspended-tx: #475569;
+
+  --shadow-sm:   0 2px 6px rgba(124, 111, 250, 0.08);
+  --shadow-md:   0 6px 18px rgba(124, 111, 250, 0.10);
+  --shadow-lg:   0 16px 36px rgba(124, 111, 250, 0.14);
+  --shadow-glow: 0 0 28px rgba(124, 111, 250, 0.16);
+}
+
+:root[data-theme="light"] select { color-scheme: light; }
+:root[data-theme="light"] select option { background-color: #ffffff; color: var(--text-primary); }
 
 /* ── Reset ──────────────────────────────────── */
 *, *::before, *::after {
@@ -85,8 +138,8 @@ select option {
 /* ── Scrollbar ──────────────────────────────── */
 ::-webkit-scrollbar        { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track  { background: transparent; }
-::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.12); border-radius: var(--radius-full); }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+::-webkit-scrollbar-thumb  { background: rgba(var(--overlay-rgb),0.12); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: rgba(var(--overlay-rgb),0.22); }
 
 /* ── Layout ─────────────────────────────────── */
 .app-container {
@@ -110,7 +163,7 @@ select option {
 }
 
 .glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(var(--overlay-rgb), 0.12);
 }
 
 /* ── Buttons ─────────────────────────────────── */
@@ -148,14 +201,14 @@ select option {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(var(--overlay-rgb), 0.06);
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(var(--overlay-rgb), 0.1);
+  border-color: rgba(var(--overlay-rgb), 0.16);
 }
 
 .btn-sm {
@@ -183,17 +236,17 @@ select option {
   letter-spacing: 0.01em;
 }
 
-.badge-study    { background: rgba(32, 201, 151, 0.14); color: #34d399; border: 1px solid rgba(32, 201, 151, 0.28); }
-.badge-reading  { background: rgba(167, 139, 250, 0.14); color: #c4b5fd; border: 1px solid rgba(167, 139, 250, 0.28); }
-.badge-health   { background: rgba(242, 92, 120, 0.14); color: #fca5a5; border: 1px solid rgba(242, 92, 120, 0.28); }
-.badge-exercise { background: rgba(242, 92, 120, 0.14); color: #fca5a5; border: 1px solid rgba(242, 92, 120, 0.28); }
-.badge-career   { background: rgba(56, 189, 248, 0.14); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.28); }
-.badge-finance  { background: rgba(245, 158, 11, 0.14); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.28); }
-.badge-hobby    { background: rgba(236, 72, 153, 0.14); color: #f9a8d4; border: 1px solid rgba(236, 72, 153, 0.28); }
-.badge-other    { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
+.badge-study    { background: rgba(32, 201, 151, 0.14); color: var(--badge-study-tx); border: 1px solid rgba(32, 201, 151, 0.28); }
+.badge-reading  { background: rgba(167, 139, 250, 0.14); color: var(--badge-reading-tx); border: 1px solid rgba(167, 139, 250, 0.28); }
+.badge-health   { background: rgba(242, 92, 120, 0.14); color: var(--badge-health-tx); border: 1px solid rgba(242, 92, 120, 0.28); }
+.badge-exercise { background: rgba(242, 92, 120, 0.14); color: var(--badge-health-tx); border: 1px solid rgba(242, 92, 120, 0.28); }
+.badge-career   { background: rgba(56, 189, 248, 0.14); color: var(--badge-career-tx); border: 1px solid rgba(56, 189, 248, 0.28); }
+.badge-finance  { background: rgba(245, 158, 11, 0.14); color: var(--badge-finance-tx); border: 1px solid rgba(245, 158, 11, 0.28); }
+.badge-hobby    { background: rgba(236, 72, 153, 0.14); color: var(--badge-hobby-tx); border: 1px solid rgba(236, 72, 153, 0.28); }
+.badge-other    { background: rgba(148, 163, 184, 0.1); color: var(--badge-other-tx); border: 1px solid rgba(148, 163, 184, 0.2); }
 
 /* ── Status Badges ───────────────────────────── */
-.badge-status-in_progress { background: rgba(124, 111, 250, 0.13); color: #a5b4fc; }
-.badge-status-completed   { background: rgba(32, 201, 151, 0.13); color: #6ee7b7; }
-.badge-status-delayed     { background: rgba(242, 92, 120, 0.13); color: #fca5a5; }
-.badge-status-suspended   { background: rgba(148, 163, 184, 0.1); color: #94a3b8; }
+.badge-status-in_progress { background: rgba(124, 111, 250, 0.13); color: var(--badge-progress-tx); }
+.badge-status-completed   { background: rgba(32, 201, 151, 0.13); color: var(--badge-completed-tx); }
+.badge-status-delayed     { background: rgba(242, 92, 120, 0.13); color: var(--badge-delayed-tx); }
+.badge-status-suspended   { background: rgba(148, 163, 184, 0.1); color: var(--badge-suspended-tx); }

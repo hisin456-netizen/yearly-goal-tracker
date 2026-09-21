@@ -6,9 +6,19 @@
   <title>로그인 — Yearly Goal Tracker</title>
   <meta name="description" content="연간 목표를 세우고 매일 체크인하며 당신의 성장을 기록하세요.">
   <meta name="theme-color" content="#09090f">
+  <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/login.css">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('ygt_theme');
+        if (t) document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
+  <button type="button" id="theme-toggle-btn" class="btn btn-secondary btn-icon" style="position: fixed; top: 20px; right: 20px; z-index: 10;" aria-label="테마 전환"></button>
   <div class="login-layout">
 
     <!-- Left: Brand Panel (데스크톱만 표시) -->

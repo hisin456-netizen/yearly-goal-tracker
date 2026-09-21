@@ -9,7 +9,17 @@
 
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/calendar.css">
+  <link rel="stylesheet" href="/css/kanban.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('ygt_theme');
+        if (t) document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <div class="app-container">
@@ -33,9 +43,7 @@
 
       <div class="header-actions">
         <div id="auth-header-container" style="display: flex; align-items: center; gap: 8px;"></div>
-        <a href="/calendar.html" class="btn btn-secondary" id="calendar-link-btn">
-          <span>📅</span> 캘린더
-        </a>
+        <button type="button" class="btn btn-secondary btn-icon" id="theme-toggle-btn" aria-label="테마 전환"></button>
         <button type="button" class="btn btn-primary" id="add-goal-btn">
           <span>+</span> 새 목표
         </button>
@@ -46,6 +54,8 @@
     <nav class="section-nav" id="section-nav">
       <button class="section-nav-tab active" data-target="kpi-section">📊 대시보드</button>
       <button class="section-nav-tab" data-target="timeline-container">🎯 목표</button>
+      <button class="section-nav-tab" data-target="kanban-container">🗂️ 세부 목표</button>
+      <button class="section-nav-tab" data-target="calendar-container">📆 캘린더</button>
       <button class="section-nav-tab" data-target="heatmap-container">🌱 잔디</button>
       <button class="section-nav-tab" data-target="linechart-container">📈 통계</button>
       <button class="section-nav-tab" data-target="notes-container">🗒️ 노트</button>
@@ -125,6 +135,22 @@
           </div>
         </aside>
       </div>
+
+      <!-- 세부 목표 (칸반보드) -->
+      <section class="glass-card timeline-section" id="kanban-container" aria-label="세부 목표 칸반보드">
+        <div style="text-align: center; padding: 48px 20px; color: var(--text-muted);">
+          <div style="font-size: 1.8rem; margin-bottom: 8px;">⏳</div>
+          <p style="font-size: 0.88rem;">불러오는 중...</p>
+        </div>
+      </section>
+
+      <!-- 캘린더 / 일정 -->
+      <section class="timeline-section" id="calendar-container" aria-label="캘린더">
+        <div class="glass-card" style="text-align: center; padding: 48px 20px; color: var(--text-muted);">
+          <div style="font-size: 1.8rem; margin-bottom: 8px;">⏳</div>
+          <p style="font-size: 0.88rem;">불러오는 중...</p>
+        </div>
+      </section>
 
       <!-- Heatmap -->
       <section class="glass-card heatmap-section" id="heatmap-container" aria-label="일일 실천 잔디">
