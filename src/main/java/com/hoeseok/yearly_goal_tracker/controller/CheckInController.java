@@ -37,22 +37,26 @@ public class CheckInController {
 
     @GetMapping("/sub-tasks/{subTaskId}/check-ins")
     public ResponseEntity<ApiResponse<List<CheckInResponse>>> getCheckIns(
+            @AuthenticationPrincipal Long authUserId,
             @PathVariable Long subTaskId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
         List<CheckInResponse> responses;
         if (startDate != null && endDate != null) {
-            responses = checkInService.getCheckInsByDateRange(subTaskId, startDate, endDate);
+            responses = checkInService.getCheckInsByDateRange(authUserId, subTaskId, startDate, endDate);
         } else {
-            responses = checkInService.getCheckInsBySubTaskId(subTaskId);
+            responses = checkInService.getCheckInsBySubTaskId(authUserId, subTaskId);
         }
         return ResponseEntity.ok(ApiResponse.success(responses));
     }
 
     @GetMapping("/check-ins/{id}")
-    public ResponseEntity<ApiResponse<CheckInResponse>> getCheckIn(@PathVariable Long id) {
-        CheckInResponse response = checkInService.getCheckInById(id);
+    public ResponseEntity<ApiResponse<CheckInResponse>> getCheckIn(
+            @AuthenticationPrincipal Long authUserId,
+            @PathVariable Long id
+    ) {
+        CheckInResponse response = checkInService.getCheckInById(authUserId, id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

@@ -2,11 +2,14 @@ package com.hoeseok.yearly_goal_tracker.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.hoeseok.yearly_goal_tracker.common.exception.CustomException;
+import com.hoeseok.yearly_goal_tracker.common.exception.ErrorCode;
 import com.hoeseok.yearly_goal_tracker.common.exception.GlobalExceptionHandler;
 import com.hoeseok.yearly_goal_tracker.domain.enums.CheckInStatus;
 import com.hoeseok.yearly_goal_tracker.dto.checkin.CheckInCreateRequest;
 import com.hoeseok.yearly_goal_tracker.dto.checkin.CheckInResponse;
 import com.hoeseok.yearly_goal_tracker.service.CheckInService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,10 +50,37 @@ class CheckInControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(checkInController)
                 .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(AuthTestSupport.principalResolver())
                 .build();
+        AuthTestSupport.loginAs(1L);
 
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+    }
+
+    @AfterEach
+    void tearDown() {
+        AuthTestSupport.logout();
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/sub-tasks/{subTaskId}/check-ins - 남의 하위 태스크면 403")
+    void getCheckIns_forbidden() throws Exception {
+        given(checkInService.getCheckInsBySubTaskId(1L, 99L))
+                .willThrow(new CustomException(ErrorCode.FORBIDDEN));
+
+        mockMvc.perform(get("/api/v1/sub-tasks/99/check-ins"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/check-ins/{id} - 남의 체크인이면 403")
+    void getCheckIn_forbidden() throws Exception {
+        given(checkInService.getCheckInById(1L, 99L))
+                .willThrow(new CustomException(ErrorCode.FORBIDDEN));
+
+        mockMvc.perform(get("/api/v1/check-ins/99"))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -75,7 +105,7 @@ class CheckInControllerTest {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        given(checkInService.createCheckIn(eq(10L), any(CheckInCreateRequest.class))).willReturn(response);
+        given(checkInService.createCheckIn(eq(1L), eq(10L), any(CheckInCreateRequest.class))).willReturn(response);
 
         mockMvc.perform(post("/api/v1/sub-tasks/10/check-ins")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -100,7 +130,7 @@ class CheckInControllerTest {
                 .memo("목표 달성")
                 .build();
 
-        given(checkInService.getCheckInsBySubTaskId(10L)).willReturn(List.of(response));
+        given(checkInService.getCheckInsBySubTaskId(1L, 10L)).willReturn(List.of(response));
 
         mockMvc.perform(get("/api/v1/sub-tasks/10/check-ins"))
                 .andExpect(status().isOk())

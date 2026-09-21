@@ -36,16 +36,20 @@ public class SubTaskController {
 
     @GetMapping("/goals/{goalId}/sub-tasks")
     public ResponseEntity<ApiResponse<List<SubTaskResponse>>> getSubTasks(
+            @AuthenticationPrincipal Long authUserId,
             @PathVariable Long goalId,
             @RequestParam(required = false) TaskStatus status
     ) {
-        List<SubTaskResponse> responses = subTaskService.getSubTasksByGoalId(goalId, status);
+        List<SubTaskResponse> responses = subTaskService.getSubTasksByGoalId(authUserId, goalId, status);
         return ResponseEntity.ok(ApiResponse.success(responses));
     }
 
     @GetMapping("/sub-tasks/{id}")
-    public ResponseEntity<ApiResponse<SubTaskResponse>> getSubTask(@PathVariable Long id) {
-        SubTaskResponse response = subTaskService.getSubTaskById(id);
+    public ResponseEntity<ApiResponse<SubTaskResponse>> getSubTask(
+            @AuthenticationPrincipal Long authUserId,
+            @PathVariable Long id
+    ) {
+        SubTaskResponse response = subTaskService.getSubTaskById(authUserId, id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

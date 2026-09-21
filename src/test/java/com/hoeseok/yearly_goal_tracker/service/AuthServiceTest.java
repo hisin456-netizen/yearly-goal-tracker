@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +41,9 @@ class AuthServiceTest {
 
     @Mock
     private LoginHistoryService loginHistoryService;
+
+    @Mock
+    private SignupPolicy signupPolicy;
 
     @InjectMocks
     private AuthService authService;
@@ -62,6 +66,7 @@ class AuthServiceTest {
                 .role(UserRole.ROLE_USER)
                 .build();
 
+        given(signupPolicy.isAllowed("test@example.com")).willReturn(true);
         given(userRepository.existsByEmail("test@example.com")).willReturn(false);
         given(passwordEncoder.encode("password123!")).willReturn("encodedPassword");
         given(userRepository.save(any(User.class))).willReturn(savedUser);
@@ -86,12 +91,33 @@ class AuthServiceTest {
                 .password("password123!")
                 .build();
 
+        given(signupPolicy.isAllowed("duplicate@example.com")).willReturn(true);
         given(userRepository.existsByEmail("duplicate@example.com")).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> authService.signup(request))
                 .isInstanceOf(CustomException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.EMAIL_DUPLICATION);
+    }
+
+    @Test
+    @DisplayName("회원가입 실패 - 허용되지 않은 이메일이면 SIGNUP_NOT_ALLOWED, 저장/중복조회도 하지 않는다")
+    void signup_fail_notAllowedEmail() {
+        // given
+        SignupRequest request = SignupRequest.builder()
+                .email("stranger@example.com")
+                .username("낯선사람")
+                .password("password123!")
+                .build();
+
+        given(signupPolicy.isAllowed("stranger@example.com")).willReturn(false);
+
+        // when & then
+        assertThatThrownBy(() -> authService.signup(request))
+                .isInstanceOf(CustomException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.SIGNUP_NOT_ALLOWED);
+        verify(userRepository, never()).existsByEmail(any());
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test

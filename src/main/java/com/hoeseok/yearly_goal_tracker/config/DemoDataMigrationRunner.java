@@ -6,6 +6,7 @@ import com.hoeseok.yearly_goal_tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Slf4j
 @Component
+@Profile("!prod") // 운영에서는 비밀번호를 password123!로 덮어쓰면 안 되므로 제외
 @RequiredArgsConstructor
 public class DemoDataMigrationRunner implements CommandLineRunner {
 

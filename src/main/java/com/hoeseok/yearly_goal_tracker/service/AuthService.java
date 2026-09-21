@@ -23,12 +23,18 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final LoginHistoryService loginHistoryService;
+    private final SignupPolicy signupPolicy;
 
     /**
      * 회원가입
      */
     @Transactional
     public UserResponse signup(SignupRequest request) {
+        // 허용된 이메일만 가입 가능 (중복 체크보다 먼저 검사해서 가입 여부가 노출되지 않게 한다)
+        if (!signupPolicy.isAllowed(request.getEmail())) {
+            throw new CustomException(ErrorCode.SIGNUP_NOT_ALLOWED);
+        }
+
         // 이메일 중복 체크
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new CustomException(ErrorCode.EMAIL_DUPLICATION);

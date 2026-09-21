@@ -18,24 +18,21 @@ public class DashboardController {
 
     private final DashboardService dashboardService;
 
+    // 통계는 항상 인증된 사용자 본인 기준. 요청으로 받은 userId는 신뢰하지 않는다.
     @GetMapping("/summary")
     public ResponseEntity<ApiResponse<DashboardSummaryResponse>> getSummary(
-            @AuthenticationPrincipal Long authUserId,
-            @RequestParam(required = false) Long userId
+            @AuthenticationPrincipal Long authUserId
     ) {
-        Long targetUserId = userId != null ? userId : authUserId;
-        DashboardSummaryResponse response = dashboardService.getSummary(targetUserId);
+        DashboardSummaryResponse response = dashboardService.getSummary(authUserId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/heatmap")
     public ResponseEntity<ApiResponse<com.hoeseok.yearly_goal_tracker.dto.dashboard.HeatmapResponse>> getHeatmap(
             @AuthenticationPrincipal Long authUserId,
-            @RequestParam(required = false) Long userId,
             @RequestParam(defaultValue = "105") int days
     ) {
-        Long targetUserId = userId != null ? userId : authUserId;
-        com.hoeseok.yearly_goal_tracker.dto.dashboard.HeatmapResponse response = dashboardService.getHeatmap(targetUserId, days);
+        com.hoeseok.yearly_goal_tracker.dto.dashboard.HeatmapResponse response = dashboardService.getHeatmap(authUserId, days);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }
