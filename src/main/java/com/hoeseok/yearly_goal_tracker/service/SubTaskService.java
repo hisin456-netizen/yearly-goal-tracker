@@ -39,14 +39,16 @@ public class SubTaskService {
                 .title(request.getTitle())
                 .periodType(request.getPeriodType())
                 .targetCount(request.getTargetCount())
-                .status(TaskStatus.IN_PROGRESS)
+                .status(TaskStatus.TODO)
                 .build();
 
         SubTask saved = subTaskRepository.save(subTask);
         return SubTaskResponse.from(saved);
     }
 
-    public List<SubTaskResponse> getSubTasksByGoalId(Long goalId, TaskStatus status) {
+    public List<SubTaskResponse> getSubTasksByGoalId(Long userId, Long goalId, TaskStatus status) {
+        goalService.validateGoalOwner(goalService.findGoalById(goalId), userId);
+
         List<SubTask> list;
         if (status != null) {
             list = subTaskRepository.findByGoalIdAndStatusOrderByCreatedAtAsc(goalId, status);
@@ -59,8 +61,9 @@ public class SubTaskService {
                 .collect(Collectors.toList());
     }
 
-    public SubTaskResponse getSubTaskById(Long subTaskId) {
+    public SubTaskResponse getSubTaskById(Long userId, Long subTaskId) {
         SubTask subTask = findSubTaskById(subTaskId);
+        validateSubTaskOwner(subTask, userId);
         return SubTaskResponse.from(subTask);
     }
 

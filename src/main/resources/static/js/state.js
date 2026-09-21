@@ -10,6 +10,8 @@ export const state = {
   searchKeyword: '',
   goals: [], // GoalDetailResponse objects
   subTasks: [], // flattened subtasks with goal meta
+  selectedGoalId: null,
+  selectedGoalTitle: '',
   listeners: [],
 
   subscribe(listener) {
@@ -42,6 +44,12 @@ export const state = {
 
   setYear(year) {
     this.currentYear = year;
+    this.notify();
+  },
+
+  setSelectedGoal(goalId, goalTitle) {
+    this.selectedGoalId = goalId;
+    this.selectedGoalTitle = goalTitle || '';
     this.notify();
   },
 

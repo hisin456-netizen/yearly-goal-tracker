@@ -275,18 +275,24 @@ export function setupModals(modalContainer, onDataChanged, showToast) {
         const isCompleted = detail.status === 'COMPLETED';
 
         const subTasksHtml = (detail.subTasks || [])
-          .map(
-            (st) => `
-          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255, 255, 255, 0.04); border-radius: 8px; margin-bottom: 8px;">
-            <div>
-              <div style="font-weight: 700; font-size: 0.9rem;">${st.title}</div>
-              <div style="font-size: 0.76rem; color: var(--text-muted);">주기: ${st.periodType === 'WEEKLY' ? '주간' : '월간'} | 목표 횟수: ${st.targetCount}회</div>
+          .map(st => `
+            <div class="subtask-card" id="st-card-${st.id}" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); border-radius: 10px; margin-bottom: 10px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px;">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.9rem;">${st.title}</div>
+                  <div style="font-size: 0.76rem; color: var(--text-muted);">
+                    ${st.periodType === 'DAILY' ? '매일' : st.periodType === 'WEEKLY' ? '주간' : '월간'} | 목표 ${st.targetCount}회
+                  </div>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <a class="btn btn-secondary btn-sm open-log-page-btn"
+                     href="/log.html?stId=${st.id}&stTitle=${encodeURIComponent(st.title)}&goalTitle=${encodeURIComponent(detail.title)}"
+                     style="font-size: 0.75rem; text-decoration: none;">📋 기록 보기</a>
+                  <button type="button" class="btn btn-secondary btn-sm delete-subtask-btn" data-st-id="${st.id}" style="color: var(--color-coral); border-color: rgba(244,63,94,0.3);">삭제</button>
+                </div>
+              </div>
             </div>
-            <button type="button" class="btn btn-secondary btn-sm delete-subtask-btn" data-st-id="${st.id}" style="color: var(--color-coral); border-color: rgba(244, 63, 94, 0.3);">삭제</button>
-          </div>
-        `
-          )
-          .join('');
+          `).join('');
 
         bodyEl.innerHTML = `
           <!-- Header Status Bar with Quick Toggle -->

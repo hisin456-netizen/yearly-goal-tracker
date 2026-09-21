@@ -15,6 +15,8 @@ public class UserResponse {
     private final Long id;
     private final String email;
     private final String username;
+    private final String discordWebhookUrl;
+    private final Integer defaultReminderMinutes;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
@@ -23,6 +25,8 @@ public class UserResponse {
                 .id(user.getId())
                 .email(user.getEmail())
                 .username(user.getUsername())
+                .discordWebhookUrl(user.getDiscordWebhookUrl())
+                .defaultReminderMinutes(user.getDefaultReminderMinutes())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

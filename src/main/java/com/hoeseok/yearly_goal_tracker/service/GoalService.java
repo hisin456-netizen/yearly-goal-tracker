@@ -28,11 +28,6 @@ public class GoalService {
     private final UserService userService;
 
     @Transactional
-    public GoalResponse createGoal(GoalCreateRequest request) {
-        return createGoal(request.getUserId(), request);
-    }
-
-    @Transactional
     public GoalResponse createGoal(Long userId, GoalCreateRequest request) {
         if (request.getStartDate().isAfter(request.getEndDate())) {
             throw new CustomException(ErrorCode.INVALID_GOAL_PERIOD);

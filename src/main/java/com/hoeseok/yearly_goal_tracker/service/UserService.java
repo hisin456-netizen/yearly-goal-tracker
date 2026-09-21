@@ -3,6 +3,7 @@ package com.hoeseok.yearly_goal_tracker.service;
 import com.hoeseok.yearly_goal_tracker.common.exception.CustomException;
 import com.hoeseok.yearly_goal_tracker.common.exception.ErrorCode;
 import com.hoeseok.yearly_goal_tracker.domain.User;
+import com.hoeseok.yearly_goal_tracker.dto.user.NotificationSettingUpdateRequest;
 import com.hoeseok.yearly_goal_tracker.dto.user.UserCreateRequest;
 import com.hoeseok.yearly_goal_tracker.dto.user.UserResponse;
 import com.hoeseok.yearly_goal_tracker.repository.UserRepository;
@@ -49,5 +50,12 @@ public class UserService {
     public User findUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    @Transactional
+    public UserResponse updateNotificationSettings(Long userId, NotificationSettingUpdateRequest request) {
+        User user = findUserById(userId);
+        user.updateNotificationSettings(request.getDiscordWebhookUrl(), request.getDefaultReminderMinutes());
+        return UserResponse.from(user);
     }
 }

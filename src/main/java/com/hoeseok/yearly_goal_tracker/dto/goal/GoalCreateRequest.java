@@ -15,8 +15,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class GoalCreateRequest {
 
-    private Long userId;
-
     @NotBlank(message = "목표 제목은 필수 입력값입니다.")
     @Size(max = 100, message = "목표 제목은 100자 이하이어야 합니다.")
     private String title;

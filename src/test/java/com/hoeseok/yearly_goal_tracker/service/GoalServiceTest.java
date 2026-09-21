@@ -70,7 +70,6 @@ class GoalServiceTest {
     void createGoal_success() {
         // given
         GoalCreateRequest request = GoalCreateRequest.builder()
-                .userId(1L)
                 .title("정보처리기사 취득")
                 .description("2026년 정처기 동차 합격")
                 .category(GoalCategory.STUDY)
@@ -83,7 +82,7 @@ class GoalServiceTest {
         given(goalRepository.save(any(Goal.class))).willReturn(goal);
 
         // when
-        GoalResponse response = goalService.createGoal(request);
+        GoalResponse response = goalService.createGoal(1L, request);
 
         // then
         assertThat(response.getTitle()).isEqualTo("정보처리기사 취득");
@@ -96,7 +95,6 @@ class GoalServiceTest {
     void createGoal_invalidDateRange() {
         // given
         GoalCreateRequest request = GoalCreateRequest.builder()
-                .userId(1L)
                 .title("잘못된 목표")
                 .category(GoalCategory.STUDY)
                 .startDate(LocalDate.of(2026, 12, 31))
@@ -104,7 +102,7 @@ class GoalServiceTest {
                 .build();
 
         // when & then
-        assertThatThrownBy(() -> goalService.createGoal(request))
+        assertThatThrownBy(() -> goalService.createGoal(1L, request))
                 .isInstanceOf(CustomException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_GOAL_PERIOD);
     }

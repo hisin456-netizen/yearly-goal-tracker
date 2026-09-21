@@ -22,6 +22,8 @@ public class MallocTest {
         System.out.println("==================================================");
         test.testUnsafeMallocAndFree();
         System.out.println("==================================================");
+
+        Field f = Unsafe.class.getDeclaredField("theUnsafe");
     }
 
     @Test

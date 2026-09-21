@@ -25,6 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -108,14 +110,42 @@ class CheckInServiceTest {
     @DisplayName("하위 태스크별 체크인 목록 조회 성공")
     void getCheckInsBySubTaskId_success() {
         // given
+        given(subTaskService.findSubTaskById(1L)).willReturn(subTask);
         given(checkInRepository.findBySubTaskIdOrderByCheckInDateDesc(1L)).willReturn(List.of(checkIn));
 
         // when
-        List<CheckInResponse> responses = checkInService.getCheckInsBySubTaskId(1L);
+        List<CheckInResponse> responses = checkInService.getCheckInsBySubTaskId(1L, 1L);
 
         // then
         assertThat(responses).hasSize(1);
         assertThat(responses.get(0).getId()).isEqualTo(100L);
+    }
+
+    @Test
+    @DisplayName("하위 태스크별 체크인 목록 조회 실패 - 남의 하위 태스크는 소유자 검사에서 막히고 조회하지 않는다")
+    void getCheckInsBySubTaskId_forbidden() {
+        // given
+        given(subTaskService.findSubTaskById(1L)).willReturn(subTask);
+        willThrow(new CustomException(ErrorCode.FORBIDDEN)).given(subTaskService).validateSubTaskOwner(subTask, 2L);
+
+        // when & then
+        assertThatThrownBy(() -> checkInService.getCheckInsBySubTaskId(2L, 1L))
+                .isInstanceOf(CustomException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN);
+        verify(checkInRepository, never()).findBySubTaskIdOrderByCheckInDateDesc(any());
+    }
+
+    @Test
+    @DisplayName("체크인 단건 조회 실패 - 남의 체크인은 FORBIDDEN")
+    void getCheckInById_forbidden() {
+        // given
+        given(checkInRepository.findById(100L)).willReturn(Optional.of(checkIn));
+        willThrow(new CustomException(ErrorCode.FORBIDDEN)).given(subTaskService).validateSubTaskOwner(subTask, 2L);
+
+        // when & then
+        assertThatThrownBy(() -> checkInService.getCheckInById(2L, 100L))
+                .isInstanceOf(CustomException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN);
     }
 
     @Test

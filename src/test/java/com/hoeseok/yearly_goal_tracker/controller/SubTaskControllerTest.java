@@ -2,12 +2,15 @@ package com.hoeseok.yearly_goal_tracker.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.hoeseok.yearly_goal_tracker.common.exception.CustomException;
+import com.hoeseok.yearly_goal_tracker.common.exception.ErrorCode;
 import com.hoeseok.yearly_goal_tracker.common.exception.GlobalExceptionHandler;
 import com.hoeseok.yearly_goal_tracker.domain.enums.PeriodType;
 import com.hoeseok.yearly_goal_tracker.domain.enums.TaskStatus;
 import com.hoeseok.yearly_goal_tracker.dto.subtask.SubTaskCreateRequest;
 import com.hoeseok.yearly_goal_tracker.dto.subtask.SubTaskResponse;
 import com.hoeseok.yearly_goal_tracker.service.SubTaskService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,10 +50,27 @@ class SubTaskControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(subTaskController)
                 .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(AuthTestSupport.principalResolver())
                 .build();
+        AuthTestSupport.loginAs(1L);
 
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+    }
+
+    @AfterEach
+    void tearDown() {
+        AuthTestSupport.logout();
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/goals/{goalId}/sub-tasks - 남의 목표면 403")
+    void getSubTasks_forbidden() throws Exception {
+        given(subTaskService.getSubTasksByGoalId(eq(1L), eq(99L), any()))
+                .willThrow(new CustomException(ErrorCode.FORBIDDEN));
+
+        mockMvc.perform(get("/api/v1/goals/99/sub-tasks"))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -73,7 +93,7 @@ class SubTaskControllerTest {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        given(subTaskService.createSubTask(eq(10L), any(SubTaskCreateRequest.class))).willReturn(response);
+        given(subTaskService.createSubTask(eq(1L), eq(10L), any(SubTaskCreateRequest.class))).willReturn(response);
 
         mockMvc.perform(post("/api/v1/goals/10/sub-tasks")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -98,7 +118,7 @@ class SubTaskControllerTest {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        given(subTaskService.getSubTasksByGoalId(eq(10L), any())).willReturn(List.of(response));
+        given(subTaskService.getSubTasksByGoalId(eq(1L), eq(10L), any())).willReturn(List.of(response));
 
         mockMvc.perform(get("/api/v1/goals/10/sub-tasks"))
                 .andExpect(status().isOk())

@@ -29,21 +29,18 @@ public class GoalController {
             @AuthenticationPrincipal Long authUserId,
             @Valid @RequestBody GoalCreateRequest request
     ) {
-        GoalResponse response = (request.getUserId() != null)
-                ? goalService.createGoal(request)
-                : goalService.createGoal(authUserId, request);
+        // 소유자는 항상 인증된 사용자. 요청으로 받은 userId는 신뢰하지 않는다.
+        GoalResponse response = goalService.createGoal(authUserId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("목표가 등록되었습니다.", response));
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<GoalResponse>>> getGoals(
             @AuthenticationPrincipal Long authUserId,
-            @RequestParam(required = false) Long userId,
             @RequestParam(required = false) GoalCategory category,
             @RequestParam(required = false) GoalStatus status
     ) {
-        Long targetUserId = userId != null ? userId : authUserId;
-        List<GoalResponse> responses = goalService.getGoals(targetUserId, category, status);
+        List<GoalResponse> responses = goalService.getGoals(authUserId, category, status);
         return ResponseEntity.ok(ApiResponse.success(responses));
     }
 

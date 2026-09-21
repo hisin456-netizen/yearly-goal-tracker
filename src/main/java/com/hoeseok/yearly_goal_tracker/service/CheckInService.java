@@ -50,21 +50,28 @@ public class CheckInService {
         return CheckInResponse.from(saved);
     }
 
-    public List<CheckInResponse> getCheckInsBySubTaskId(Long subTaskId) {
+    public List<CheckInResponse> getCheckInsBySubTaskId(Long userId, Long subTaskId) {
+        validateSubTaskAccess(userId, subTaskId);
         return checkInRepository.findBySubTaskIdOrderByCheckInDateDesc(subTaskId).stream()
                 .map(CheckInResponse::from)
                 .collect(Collectors.toList());
     }
 
-    public List<CheckInResponse> getCheckInsByDateRange(Long subTaskId, LocalDate startDate, LocalDate endDate) {
+    public List<CheckInResponse> getCheckInsByDateRange(Long userId, Long subTaskId, LocalDate startDate, LocalDate endDate) {
+        validateSubTaskAccess(userId, subTaskId);
         return checkInRepository.findBySubTaskIdAndCheckInDateBetweenOrderByCheckInDateAsc(subTaskId, startDate, endDate).stream()
                 .map(CheckInResponse::from)
                 .collect(Collectors.toList());
     }
 
-    public CheckInResponse getCheckInById(Long checkInId) {
+    public CheckInResponse getCheckInById(Long userId, Long checkInId) {
         CheckIn checkIn = findCheckInById(checkInId);
+        validateCheckInOwner(checkIn, userId);
         return CheckInResponse.from(checkIn);
+    }
+
+    private void validateSubTaskAccess(Long userId, Long subTaskId) {
+        subTaskService.validateSubTaskOwner(subTaskService.findSubTaskById(subTaskId), userId);
     }
 
     @Transactional
