@@ -1,0 +1,17 @@
+.git
+.gradle
+.vscode
+.idea
+build
+bin
+out
+e2e
+docs
+image
+uploads
+.env
+*.md
+init_demo.sql
+
+# 로컬 개발용 시크릿이 이미지에 들어가지 않도록 제외
+src/main/resources/application.properties

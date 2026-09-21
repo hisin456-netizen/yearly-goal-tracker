@@ -1,0 +1,6 @@
+# HTTPS 종단 리버스 프록시. 인증서(Let's Encrypt)는 Caddy가 자동 발급/갱신한다.
+# DOMAIN 은 .env 에서 주입한다 (예: mygoals.duckdns.org)
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy app:8080
+}
